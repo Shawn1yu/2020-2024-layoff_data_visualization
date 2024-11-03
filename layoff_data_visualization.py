@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import squarify
 from mpl_toolkits.basemap import Basemap
-import os
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -54,6 +53,17 @@ df['Month'] = df['Date'].dt.month_name()
 df['quarter'] = df['Date'].dt.to_period('Q')
 df.head()
 
+from wordcloud import WordCloud
+company_names = " ".join(df.sort_values('Laid_Off_Count', ascending=False)['Company'].head(10))
+
+wordcloud = WordCloud(max_words=200, background_color="white", colormap="viridis").generate(company_names)
+
+plt.figure(figsize=(15,10))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.title('Top 10 Companies with Highest Layoffs')
+plt.show()
+
 fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(20, 10))
 
 sns.barplot(
@@ -88,6 +98,20 @@ sns.barplot(
 )
 axs[1].set_title('Percent Laid Off by Company Stage')
 axs[1].set_xlabel('Percent Laid Off')
+
+plt.tight_layout()
+plt.show()
+
+fig, ax = plt.subplots(figsize=(12, 6))
+
+sns.barplot(
+    data=df,
+    x='Year', y='Laid_Off_Count', hue='Month',
+    estimator=sum, edgecolor='black', palette='pastel', ax=ax
+)
+
+ax.set_title('Layoffs by Year and Month')
+ax.set_ylabel('Laid Off Count')
 
 plt.tight_layout()
 plt.show()
@@ -279,20 +303,6 @@ ax.set_ylabel('Location HQ')
 plt.tight_layout()
 plt.show()
 
-fig, ax = plt.subplots(figsize=(12, 6))
-
-sns.barplot(
-    data=df,
-    x='Year', y='Laid_Off_Count', hue='Month',
-    estimator=sum, edgecolor='black', palette='pastel', ax=ax
-)
-
-ax.set_title('Layoffs by Year and Month')
-ax.set_ylabel('Laid Off Count')
-
-plt.tight_layout()
-plt.show()
-
 import plotly.express as px
 
 world = df.groupby("Country")["Laid_Off_Count"].sum().reset_index()
@@ -310,11 +320,11 @@ figure = px.choropleth(
 
 figure.show()
 
-sorted_df = df.sort_values('Laid_Off_Count', ascending=False).head(10)
+sorted_df = df.groupby('Company')['Laid_Off_Count'].sum().sort_values(ascending=False).reset_index().head(10)
 Companies = sorted_df["Company"].tolist()
 Laid_off_count = sorted_df['Laid_Off_Count'].tolist()
 
-colors = ['#FF5733', '#FF8C00', '#FFB300', '#F4D03F', '#85C1E9', '#3498DB', '#8E44AD', '#DC7633', '#27AE60', '#34495E']
+colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F', '#581845', '#DAF7A6', '#33FF57', '#FF33EC', '#3357FF', '#57FF33']
 sizes = [count / sum(Laid_off_count) for count in Laid_off_count]
 labels = [f'{company}\n{laid_off_count}' for company, laid_off_count in zip(Companies, Laid_off_count)]
 
@@ -390,6 +400,3 @@ ax.set_yscale('log')
 plt.grid(True)
 plt.tight_layout()
 plt.show()
-
-
-
