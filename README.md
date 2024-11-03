@@ -1,6 +1,6 @@
 # 2020-2024-layoff_data_visualization
 
-Final report
+Final Report
 
 You can also check out the code here:
 
